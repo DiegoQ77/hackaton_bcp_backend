@@ -111,3 +111,35 @@ def gemini_consult(request: AdviceRequest):
     response = model.generate_content(prompt_parts)
 
     return json.loads(response.text)
+
+class InputRequest(BaseModel):
+    pregunta: str
+
+@app.post("/gemini")
+def gemini(request: InputRequest):
+    pregunta = request.pregunta
+    api_key = os.getenv("GEMINI_API_KEY")
+    
+    if not api_key:
+        raise HTTPException(status_code=500, detail="API Key is not configured.")
+    
+
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(model_name="gemini-1.5-flash",
+                                    generation_config=generation_config,
+                                    safety_settings=safety_settings)
+    
+    prompt_parts = [
+        
+        f"""Eres un asesor financiero muy amistoso y amigable, tus repuestas seran lo mas parecidas a las de un humano. Proporciona consejos en tres categorías basadas en el texto de entrada: Ahorro, Inversión, Manejo de Deudas y estado de animo de la conversacion. Puedes usar emojis\n
+        *Respuesta:\n\nResponde al texto normalmente\n\n
+        *Consejos:\n\n Listado de algunos consejos para la situacion\n\n
+        *Estado:\n\nEscoge entre estas palabras, alegria, enojo, miedo, sarcasmo, tristeza\n\n
+        *Opciones:\n\nLista algunas opciones de respuestas para continuar con la conversacion, no uses preguntas\n\n
+        pregunta:{pregunta}\n\n"""
+        
+    ]
+
+    response = model.generate_content(prompt_parts)
+
+    return json.loads(response.text)
