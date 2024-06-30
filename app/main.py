@@ -33,22 +33,22 @@ async def search_and_display_gif(request: Request):
     rating = "pg" # g pg pg-13 r
     language = "es" # español
     url = f"https://api.giphy.com/v1/gifs/search?api_key={api_key}&q={query}&limit={limit}&rating={rating}&lang={language}"
+    return url
+    # async with httpx.AsyncClient() as client:
+    #     response = await client.get(url)
+    
+    # if response.status_code != 200:
+    #     raise HTTPException(status_code=response.status_code, detail="Error al buscar GIF")
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
+    # data = response.json()
     
-    if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail="Error al buscar GIF")
-
-    data = response.json()
+    # if len(data["data"]) == 0:
+    #     gif_url = None
+    # else:
+    #     gif_url = data["data"][random.randint(0, 9)]["images"]["original"]["url"]
+    #     #gif_url = data["data"][0]["images"]["original"]["url"]
     
-    if len(data["data"]) == 0:
-        gif_url = None
-    else:
-        gif_url = data["data"][random.randint(0, 9)]["images"]["original"]["url"]
-        #gif_url = data["data"][0]["images"]["original"]["url"]
-    
-    return templates.TemplateResponse("index.html", {"request": request, "gif_url": gif_url})
+    # return templates.TemplateResponse("index.html", {"request": request, "gif_url": gif_url})
 
 
 generation_config = {
