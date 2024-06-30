@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Giphy Search</title>
+</head>
+<body>
+    <h1>Giphy Search</h1>
+    <form action="/search" method="post">
+        <input type="text" name="query" placeholder="Enter a keyword">
+        <button type="submit">Search</button>
+    </form>
+    {% if gif_url %}
+        <h2>Result:</h2>
+        <img src="{{ gif_url }}" alt="GIF">
+    {% endif %}
+</body>
+</html>
