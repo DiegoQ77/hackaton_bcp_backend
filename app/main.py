@@ -12,10 +12,6 @@ import json
 
 load_dotenv()
 
-# api_key = os.getenv("API_KEY")
-# api_secret = os.getenv("API_SECRET")
-
-# print(api_key)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -83,11 +79,13 @@ safety_settings = [
 ]
 
 class AdviceRequest(BaseModel):
-    text: str
+    contexto: str
+    informacion: str
 
 @app.post("/api/v1/gemini_consult")
 def gemini_consult(request: AdviceRequest):
-    text = request.text
+    contexto = request.contexto
+    informacion = request.informacion
     api_key = os.getenv("GEMINI_API_KEY")
     
     if not api_key:
@@ -98,30 +96,19 @@ def gemini_consult(request: AdviceRequest):
     model = genai.GenerativeModel(model_name="gemini-1.5-flash",
                                     generation_config=generation_config,
                                     safety_settings=safety_settings)
-
-    # prompt_parts = [
-    #     f"""Eres un asesor financiero muy amistoso y amigable, tus repuestas seran lo mas parecidas a las de un humano. Proporciona consejos en tres categorías basadas en el texto de entrada: Ahorro, Inversión, Manejo de Deudas y estado de animo de la conversacion\n
-    #     texto: Tengo muchas deudas y no sé cómo manejarlas.\n
-    #     **Ahorro:**\n\n"Empieza creando un presupuesto que rastree tus ingresos y gastos. Asigna una parte de tus ingresos a un fondo de ahorro de emergencia para asegurarte de tener una red de seguridad."\n\n
-    #     **Inversión:**\n\n"Considera inversiones de bajo riesgo como bonos o fondos mutuos para aumentar tu riqueza gradualmente mientras gestionas el riesgo."\n\n
-    #     **Manejo de Deudas:**\n\n"Es crucial desarrollar un plan de pago de deudas. Enfócate en pagar primero las deudas con intereses altos, considera consolidar tus deudas y evita asumir nuevas deudas."\n\n
-    #     **Estado:**\n\nSolo usa una palabra para describir la respuesta\n\n
-    #     **Respuesta:\n\nResponde al texto normalmente\n\n
-    #     texto: {text}""",
-    # ]
+    
     prompt_parts = [
-        f"""Eres un asesor financiero muy amistoso y amigable, tus repuestas seran lo mas parecidas a las de un humano. Proporciona consejos en tres categorías basadas en el texto de entrada: Ahorro, Inversión, Manejo de Deudas y estado de animo de la conversacion. Puedes usar emojis.\n
-        **Respuesta:\n\nResponde al texto normalmente\n\n
-        **Estado:**\n\nSolo usa una palabra para describir la respuesta\n\n
-        **Opciones:** \n\nLista algunas opciones de respuestas\n\n
-        texto: {text}""",
+        
+        f"""Eres un asesor financiero muy amistoso y amigable, tus repuestas seran lo mas parecidas a las de un humano. Proporciona consejos en tres categorías basadas en el texto de entrada: Ahorro, Inversión, Manejo de Deudas y estado de animo de la conversacion. Puedes usar emojis\n
+        *Respuesta:\n\nResponde al texto normalmente\n\n
+        *Consejos:\n\n Listado de algunos consejos para la situacion\n\n
+        *Estado:\n\nEscoge entre estas palabras, alegria, enojo, miedo, sarcasmo, tristeza\n\n
+        *Opciones:\n\nLista algunas opciones de respuestas para continuar con la conversacion, no uses preguntas\n\n
+        contexto:{contexto}\n\n
+        informacion:{informacion} y tambien conserva la informacion previa"""
+        
     ]
-    # chat_session = model.start_chat(
-    #     history=[
-    #         "role": "user",
-    #     ],
-    # )
+
     response = model.generate_content(prompt_parts)
-    print(response.text)
 
     return json.loads(response.text)
