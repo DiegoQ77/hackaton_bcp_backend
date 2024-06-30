@@ -6,6 +6,8 @@ import httpx
 from dotenv import load_dotenv
 import os
 import random
+from fastapi.middleware.cors import CORSMiddleware
+
 import google.generativeai as genai
 import json
 
@@ -15,6 +17,20 @@ load_dotenv()
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+# Configuración de CORS
+origins = [
+    "http://localhost:5173",  # URL de tu frontend
+    "*"
+    # Agrega más URLs si es necesario
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Ruta para servir la página HTML
